@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
+import * as Diff from "diff";
 
 type Attempt = {
   attempt: number;
@@ -18,6 +19,7 @@ export default function Home() {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [running, setRunning] = useState(false);
   const [currentAttempt, setCurrentAttempt] = useState(0);
+  const [diffLines, setDiffLines] = useState<Diff.Change[]>([]);
 
   async function generateCode() {
     if (!prompt.trim()) return;
@@ -27,6 +29,7 @@ export default function Home() {
     setSuccess(null);
     setAttempts([]);
     setCurrentAttempt(0);
+    
 
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -55,6 +58,11 @@ export default function Home() {
       body: JSON.stringify({ code: brokenCode, error, prompt }),
     });
     const data = await res.json();
+
+    // Calculate diff
+    const changes = Diff.diffLines(brokenCode, data.code);
+    setDiffLines(changes);
+
     return data.code;
   }
 
@@ -206,6 +214,35 @@ export default function Home() {
                 </div>
               </div>
             )}
+            {/* Diff viewer */}
+{diffLines.length > 0 && (
+  <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+    <div className="px-4 py-2 border-b border-white/10 flex items-center gap-2">
+      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+      <span className="text-xs text-white/40">what AI changed</span>
+      <span className="ml-auto text-xs text-white/20">
+        +{diffLines.filter(l => l.added).length} / -{diffLines.filter(l => l.removed).length} lines
+      </span>
+    </div>
+    <div className="p-4 overflow-auto max-h-48">
+      {diffLines.map((part, index) => (
+        <pre
+          key={index}
+          className={`text-xs leading-relaxed whitespace-pre-wrap ${
+            part.added
+              ? "text-green-400 bg-green-500/10"
+              : part.removed
+              ? "text-red-400 bg-red-500/10 line-through opacity-60"
+              : "text-white/30"
+          }`}
+        >
+          {part.added ? "+ " : part.removed ? "- " : "  "}
+          {part.value}
+        </pre>
+      ))}
+    </div>
+  </div>
+)}
 
             {/* Output panel */}
             {output && (
