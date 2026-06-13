@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import * as Diff from "diff";
+import { supabase } from "@/lib/supabase";
+
 
 type Attempt = {
   attempt: number;
@@ -20,6 +23,7 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [currentAttempt, setCurrentAttempt] = useState(0);
   const [diffLines, setDiffLines] = useState<Diff.Change[]>([]);
+  const router = useRouter();
 
   async function generateCode() {
     if (!prompt.trim()) return;
@@ -80,11 +84,25 @@ export default function Home() {
       setCurrentAttempt(i);
       const result = await executeCode(currentCode);
 
-      if (result.success) {
+if (result.success) {
         setCode(currentCode);
         setOutput(result.stdout);
         setSuccess(true);
         setRunning(false);
+
+        // Save successful session
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("sessions").insert({
+            user_id: user.id,
+            prompt,
+            final_code: currentCode,
+            output: result.stdout,
+            success: true,
+            attempts: i,
+            language,
+          });
+        }
         return;
       }
 
@@ -95,10 +113,24 @@ export default function Home() {
         error: errorMsg,
       }]);
 
-      if (i === maxAttempts) {
+  if (i === maxAttempts) {
         setOutput(errorMsg);
         setSuccess(false);
         setRunning(false);
+
+        // Save failed session
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("sessions").insert({
+            user_id: user.id,
+            prompt,
+            final_code: currentCode,
+            output: errorMsg,
+            success: false,
+            attempts: i,
+            language,
+          });
+        }
         return;
       }
 
@@ -120,7 +152,13 @@ export default function Home() {
           <span className="font-semibold text-white tracking-tight">SandboxAI</span>
           <span className="text-white/20 text-sm">/ compiler</span>
         </div>
-        <div className="flex items-center gap-2">
+  <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white/5 hover:bg-white/10 transition-all"
+          >
+            Dashboard
+          </button>
           <span className="text-xs text-white/40">powered by</span>
           <span className="text-xs text-violet-400 font-semibold">Groq · Llama 3.3</span>
         </div>
