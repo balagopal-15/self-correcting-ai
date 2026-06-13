@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { execa } from "execa";
+
+// Judge0 language IDs
+const LANGUAGE_IDS: { [key: string]: number } = {
+  python: 71,     // Python 3
+  javascript: 63, // Node.js
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,27 +15,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No code provided" }, { status: 400 });
     }
 
-    // Create temp folder
-    const tempDir = join(process.cwd(), "temp");
-    await mkdir(tempDir, { recursive: true });
+    const languageId = LANGUAGE_IDS[language] || 71;
+    const judge0Url = process.env.JUDGE0_API_URL || "https://ce.judge0.com";
 
-    // Save code to a temp file
-    const ext = language === "javascript" ? "js" : "py";
-    const filePath = join(tempDir, `code.${ext}`);
-    await writeFile(filePath, code, "utf-8");
-
-    // Run the code
-    const command = language === "javascript" ? "node" : "python";
-    const result = await execa(command, [filePath], {
-      timeout: 10000,
-      reject: false,
+    // Step 1: Submit code to Judge0
+    const submitRes = await fetch(`${judge0Url}/submissions?base64_encoded=false&wait=true`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        source_code: code,
+        language_id: languageId,
+        stdin: "",
+      }),
     });
 
+    const result = await submitRes.json();
+
+    // Step 2: Parse the result
+    const stdout = result.stdout || "";
+    const stderr = result.stderr || result.compile_output || result.message || "";
+    const exitCode = result.exit_code ?? (result.status?.id === 3 ? 0 : 1);
+    const success = result.status?.id === 3; // 3 = Accepted in Judge0
+
     return NextResponse.json({
-      stdout: result.stdout,
-      stderr: result.stderr,
-      exitCode: result.exitCode,
-      success: result.exitCode === 0,
+      stdout,
+      stderr,
+      exitCode,
+      success,
     });
 
   } catch (error: unknown) {

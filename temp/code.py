@@ -1,4 +1,4 @@
-a = 10
-b = 20
-sum = a + b
-print("Sum =", sum)
+print("Hello, World!")
+x = 5
+y = 10
+print("The sum of x and y is:", x + y)
