@@ -14,12 +14,14 @@
     "@monaco-editor/react": "^4.7.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
+    "@types/three": "^0.184.1",
     "diff": "^9.0.0",
     "execa": "^9.6.1",
     "groq-sdk": "^1.2.1",
     "next": "16.2.7",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

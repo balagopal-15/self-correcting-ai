@@ -8,7 +8,7 @@ const groq = new Groq({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { code, error, prompt } = body;
+    const { code, error, prompt, language } = body;
 
     if (!code || !error) {
       return NextResponse.json({ error: "Code and error are required" }, { status: 400 });
@@ -19,26 +19,17 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "You are a code fixer. You will be given broken code and an error message. Fix the code. Write ONLY the fixed code, no explanation, no markdown, no backticks. Just raw executable code.",
+          content: "You are a code fixer. Fix the broken code. Write ONLY the fixed code, no explanation, no markdown, no backticks. Just raw executable code.",
         },
         {
           role: "user",
-          content: `Original task: ${prompt}
-
-Broken code:
-${code}
-
-Error message:
-${error}
-
-Write the fixed code:`,
+          content: `Original task: ${prompt}\nLanguage: ${language || "python"}\n\nBroken code:\n${code}\n\nError:\n${error}\n\nWrite the fixed code:`,
         },
       ],
       max_tokens: 1024,
     });
 
-    const fixedCode = completion.choices[0].message.content;
-
+    const fixedCode = completion.choices[0].message.content ?? "";
     return NextResponse.json({ code: fixedCode });
 
   } catch (error: unknown) {

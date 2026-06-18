@@ -8,11 +8,9 @@ const groq = new Groq({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log("Received body:", body);
-    const { prompt } = body;
+    const { prompt, language } = body;
 
     if (!prompt) {
-      console.log("Prompt is empty!");
       return NextResponse.json({ error: "No prompt provided" }, { status: 400 });
     }
 
@@ -21,7 +19,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: "You are a code generator. Write ONLY the code, no explanation, no markdown, no backticks. Just raw executable code.",
+          content: `You are a code generator. Write ONLY the code, no explanation, no markdown, no backticks. Just raw executable code. Do NOT use GUI libraries. Do NOT use file I/O or network requests. Only write code that produces text output to stdout. The language is ${language || "python"}.`,
         },
         {
           role: "user",
@@ -31,8 +29,7 @@ export async function POST(request: NextRequest) {
       max_tokens: 1024,
     });
 
-    const generatedCode = completion.choices[0].message.content;
-
+    const generatedCode = completion.choices[0].message.content ?? "";
     return NextResponse.json({ code: generatedCode });
 
   } catch (error: unknown) {

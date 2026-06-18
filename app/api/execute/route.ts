@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Judge0 language IDs
 const LANGUAGE_IDS: { [key: string]: number } = {
-  python: 71,     // Python 3
-  javascript: 63, // Node.js
+  python: 71,
+  javascript: 63,
+  java: 62,
+  cpp: 54,
+  go: 60,
 };
 
 export async function POST(request: NextRequest) {
@@ -18,12 +20,9 @@ export async function POST(request: NextRequest) {
     const languageId = LANGUAGE_IDS[language] || 71;
     const judge0Url = process.env.JUDGE0_API_URL || "https://ce.judge0.com";
 
-    // Step 1: Submit code to Judge0
     const submitRes = await fetch(`${judge0Url}/submissions?base64_encoded=false&wait=true`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         source_code: code,
         language_id: languageId,
@@ -33,18 +32,11 @@ export async function POST(request: NextRequest) {
 
     const result = await submitRes.json();
 
-    // Step 2: Parse the result
     const stdout = result.stdout || "";
     const stderr = result.stderr || result.compile_output || result.message || "";
-    const exitCode = result.exit_code ?? (result.status?.id === 3 ? 0 : 1);
-    const success = result.status?.id === 3; // 3 = Accepted in Judge0
+    const success = result.status?.id === 3;
 
-    return NextResponse.json({
-      stdout,
-      stderr,
-      exitCode,
-      success,
-    });
+    return NextResponse.json({ stdout, stderr, exitCode: success ? 0 : 1, success });
 
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
