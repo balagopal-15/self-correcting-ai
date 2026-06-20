@@ -154,7 +154,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ height: "100vh", overflow: "auto", background: "#020204", color: "white", fontFamily: "'Inter', system-ui, sans-serif", position: "relative", overflow: "hidden" }}>
+   <div style={{ height: "100vh", overflow: "auto", background: "#020204", color: "white", fontFamily: "'Inter', system-ui, sans-serif", position: "relative" }}>
       <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1, background: "radial-gradient(ellipse at 20% 0%, rgba(124,58,237,0.2) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(6,182,212,0.15) 0%, transparent 50%), radial-gradient(ellipse at 100% 50%, rgba(236,72,153,0.1) 0%, transparent 40%)" }} />
 
