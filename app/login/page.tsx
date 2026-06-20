@@ -216,7 +216,7 @@ wrap: { position: "relative" as const, zIndex: 2, width: "100%", maxWidth: "420p
             <p style={{ textAlign: "center", fontSize: "14px", color: "rgba(255,255,255,0.3)", margin: 0 }}>
               {isSignUp ? "Already have an account? " : "New to SandboxAI? "}
               <button onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, fontFamily: "inherit", padding: 0, background: "linear-gradient(135deg, #a78bfa, #06b6d4)" as unknown as string, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" } as React.CSSProperties}>
+              style={{ border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, fontFamily: "inherit", padding: 0, background: "linear-gradient(135deg, #a78bfa, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" } as React.CSSProperties}>
                 {isSignUp ? "Sign in" : "Create account"}
               </button>
             </p>
