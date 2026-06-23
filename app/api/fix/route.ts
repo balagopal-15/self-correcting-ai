@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
           content: `Original task: ${prompt}\nLanguage: ${language || "python"}\n\nBroken code:\n${code}\n\nError:\n${error}\n\nWrite the fixed code:`,
         },
       ],
-      max_tokens: 1024,
+      max_tokens: 2048,
     });
 
     const fixedCode = completion.choices[0].message.content ?? "";

@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are a code generator. Write ONLY the code, no explanation, no markdown, no backticks. Just raw executable code. Do NOT use GUI libraries. Do NOT use file I/O or network requests. Only write code that produces text output to stdout. The language is ${language || "python"}.`,
+          content: `You are a code generator. Write ONLY the code, no explanation, no markdown, no backticks. Just raw executable code. CRITICAL RULES: Keep the program under 30 lines. NEVER use interactive input (no cin, no input(), no Scanner) — the program must run with zero user input and produce output immediately. NEVER use file I/O (no fopen, no ifstream/ofstream, no file reading/writing). NEVER use GUI libraries or network requests. Use hardcoded sample data instead of asking for input. The language is ${language || "python"}. ${language === "cpp" ? "For C++: include #include <iostream>, use using namespace std;, write int main() that returns 0." : ""} ${language === "javascript" ? "For JavaScript: Node.js compatible only, use console.log." : ""} ${language === "java" ? "For Java: class must be named Main with public static void main(String[] args)." : ""}`,
         },
         {
           role: "user",
           content: `Task: ${prompt}`,
         },
       ],
-      max_tokens: 1024,
+      max_tokens: 2048,
     });
 
     const generatedCode = completion.choices[0].message.content ?? "";

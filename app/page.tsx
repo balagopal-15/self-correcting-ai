@@ -139,7 +139,7 @@ export default function Home() {
         if (user) await supabase.from("sessions").insert({ user_id: user.id, prompt, final_code: currentCode, output: result.stdout, success: true, attempts: i, language });
         return;
       }
-      const errorMsg = result.stderr || result.error;
+      const errorMsg = result.stderr || result.error || "Unknown error occurred";
       setAttempts(prev => [...prev, { attempt: i, code: currentCode, error: errorMsg }]);
       if (i === 5) {
         setOutput(errorMsg); setSuccess(false); setRunning(false);
@@ -207,9 +207,27 @@ export default function Home() {
 
               {/* Prompt box */}
               <div style={{ borderRadius: "24px", overflow: "hidden", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(20px)" }}>
-                <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #06b6d4)", boxShadow: "0 0 8px rgba(124,58,237,0.8)" }}></div>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Prompt</span>
+                <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #06b6d4)", boxShadow: "0 0 8px rgba(124,58,237,0.8)" }}></div>
+                    <span style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Prompt</span>
+                  </div>
+                </div>
+                <div style={{ padding: "12px 20px 0", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {[
+                    "Print fibonacci series up to 50",
+                    "Bubble sort a hardcoded array",
+                    "Check if a number is prime",
+                    "Reverse a hardcoded string",
+                    "Print a star pattern triangle",
+                  ].map((ex) => (
+                    <button
+                      key={ex}
+                      onClick={() => setPrompt(`Write a ${currentLang.label} program to ${ex.toLowerCase()}`)}
+                      style={{ padding: "6px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: 500, cursor: "pointer", border: "1px solid rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.08)", color: "#c4b5fd", fontFamily: "inherit" }}>
+                      {ex}
+                    </button>
+                  ))}
                 </div>
                 <textarea
                   style={{ width: "100%", background: "transparent", padding: "20px", fontSize: "14px", color: "rgba(255,255,255,0.85)", resize: "none", outline: "none", border: "none", lineHeight: 1.7, fontFamily: "inherit", boxSizing: "border-box" }}
@@ -241,7 +259,7 @@ export default function Home() {
                         <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "#f87171", flexShrink: 0 }}>{a.attempt}</div>
                         <div>
                           <p style={{ fontSize: "12px", color: "#f87171", fontWeight: 600, margin: "0 0 3px" }}>Attempt {a.attempt} failed</p>
-                          <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", fontFamily: "monospace", margin: 0, lineHeight: 1.6 }}>{a.error.slice(0, 100)}{a.error.length > 100 ? "..." : ""}</p>
+                          <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", fontFamily: "monospace", margin: 0, lineHeight: 1.6 }}>{(a.error || "").slice(0, 100)}{(a.error || "").length > 100 ? "..." : ""}</p>
                         </div>
                       </div>
                     ))}
